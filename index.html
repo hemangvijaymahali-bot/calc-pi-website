@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinite Pi Generator</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #00ff41; /* Matrix Green */
+            font-family: 'Courier New', Courier, monospace;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #pi-display {
+            width: 90%;
+            max-width: 800px;
+            /* FIX: This stops the numbers from going off the screen */
+            word-break: break-all; 
+            white-space: normal;
+            line-height: 1.5;
+            font-size: 1.2rem;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            background: #00ff41;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Infinite Pi Generator</h1>
+    <button id="start-btn">Start Generating</button>
+    <div id="pi-display"></div>
+
+    <script>
+        const display = document.getElementById('pi-display');
+        const button = document.getElementById('start-btn');
+
+        // This is your Spigot algorithm translated to JavaScript
+        async function* calcPi() {
+            let q = 1n, r = 0n, t = 1n, k = 1n, n = 3n, l = 3n;
+            let first = true;
+
+            while (true) {
+                if (4n * q + r - t < n * t) {
+                    yield n.toString();
+                    if (first) {
+                        yield ".";
+                        first = false;
+                    }
+                    let nr = 10n * (r - n * t);
+                    n = ((10n * (3n * q + r)) / t) - 10n * n;
+                    q *= 10n;
+                    r = nr;
+                } else {
+                    let nr = (2n * q + r) * l;
+                    let nn = (q * (7n * k) + 2n + (r * l)) / (t * l);
+                    q *= k;
+                    t *= l;
+                    l += 2n;
+                    k += 1n;
+                    n = nn;
+                    r = nr;
+                }
+                // Small delay so the browser doesn't freeze
+                if (k % 10n === 0n) await new Promise(r => setTimeout(r, 0));
+            }
+        }
+
+        button.onclick = async () => {
+            button.disabled = true;
+            const generator = calcPi();
+            for await (let digit of generator) {
+                display.innerText += digit;
+                // Auto-scroll as it grows
+                window.scrollTo(0, document.body.scrollHeight);
+            }
+        };
+    </script>
+</body>
+</html>
